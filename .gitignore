@@ -1,0 +1,50 @@
+# Dependências e arquivos gerados
+node_modules/
+dist/
+release/
+test-results/
+.test-tmp/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+
+# Protótipo de demonstração e scripts históricos mantidos nesta pasta de trabalho
+shared-demo-site/
+browser-*.cjs
+scripts/package-demo.cjs
+scripts/test-html.cjs
+scripts/verify-public.cjs
+
+# Documentação das fases anteriores, preservada localmente como histórico
+docs/
+ARQUITETURA.md
+ARQUITETURA_V*.md
+AVALIACAO_V*.md
+GUIA*.md
+PUBLICACAO_V*.md
+RELATORIO_FINAL_DALEX_ERP_V4.md
+RELATORIO_TESTES_LOCAL.md
+REQUISITOS_V*.md
+VALIDACAO*.md
+
+# Dados da empresa: nunca versionar banco, anexos, exportações ou backups
+Dados/
+Anexos/
+Backups/
+Configuracoes/
+Planilhas/
+*.db
+*.sqlite
+*.sqlite3
+
+# Credenciais e arquivos locais de desenvolvimento
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

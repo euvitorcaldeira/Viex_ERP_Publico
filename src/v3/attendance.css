@@ -1,0 +1,60 @@
+.attendance-action-button.icon-btn {
+  width: 30px;
+  height: 30px;
+  color: var(--green);
+}
+
+.attendance-calendar-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  min-width: 78px;
+  white-space: nowrap;
+}
+
+.attendance-suggested {
+  color: var(--muted);
+}
+
+.attendance-action-menu {
+  position: fixed;
+  inset: auto var(--attendance-right, 8px) auto auto;
+  top: var(--attendance-edge, 8px);
+  width: min(220px, calc(100vw - 16px));
+  max-height: min(272px, var(--attendance-height, 272px));
+  margin: 0;
+  padding: 5px;
+  overflow-y: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #0003;
+}
+
+.attendance-action-menu[data-above='true'] {
+  transform: translateY(-100%);
+}
+
+.attendance-action-menu button {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 9px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-radius: 5px;
+  text-align: left;
+  font-size: 12px;
+}
+
+.attendance-action-menu button:hover:not(:disabled) {
+  background: var(--soft);
+}
+
+.attendance-action-menu button:focus-visible {
+  outline-offset: -2px;
+}

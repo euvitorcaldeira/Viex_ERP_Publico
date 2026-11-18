@@ -1,0 +1,9 @@
+import { SortableTable } from '../components/SortableTable';
+import { type State, type ProductionInput, type Production, retainedPricing, financialChanges, projected } from '../v3/domain';
+import { useCapabilities } from '../security/context';
+import { money } from '../format';
+export function PriceReview({state,draft}:{state:State;draft:ProductionInput}){
+ const {canViewFinance}=useCapabilities(),old=state.records.find(r=>r.id===draft.id);if(!old?.pricing.length)return null;
+ const next={...draft,invoiceId:old.invoiceId,pricing:retainedPricing(old,draft)} as Production,changes=financialChanges(old,next),amounts=projected(next,state);
+ return <section className="price-review"><h3>Revisão das alterações</h3><p className="footnote">Preços dos códigos mantidos são preservados se cliente e local não mudarem. Revise os totais antes de salvar.</p><div className="table-wrap"><SortableTable><thead><tr><th>Código</th><th>Quantidade anterior → nova</th>{canViewFinance&&<><th>Unitário cliente</th><th>Total cliente anterior → novo</th><th>Unitário oficina</th><th>Total oficina anterior → novo</th></>}</tr></thead><tbody>{changes.map(c=><tr key={c.code}><td>{c.code}</td><td>{c.oldQuantity} → {c.newQuantity}</td>{canViewFinance&&<><td>{money(c.newClientUnitCents)}</td><td>{money(c.oldRevenueCents)} → {money(c.newRevenueCents)}</td><td>{money(c.newWorkshopUnitCents)}</td><td>{money(c.oldCostCents)} → {money(c.newCostCents)}</td></>}</tr>)}</tbody></SortableTable></div>{canViewFinance&&<div className="invoice-total"><span>Receita recalculada: <b>{money(amounts.revenue)}</b></span><span>Custo recalculado: <b>{money(amounts.cost)}</b></span></div>}{!next.pricing.length&&<p className="footnote">Cliente/local ou todos os códigos mudaram: os novos valores precisam ser definidos antes de faturar.</p>}</section>
+}

@@ -1,0 +1,74 @@
+.balance {
+  --balance-income: var(--green);
+  --balance-expense: #a44535;
+}
+
+.dark .balance { --balance-expense: #ef9e8d; }
+.balance .finance-tabs { margin-inline: 0; flex-wrap: wrap; }
+.balance .footnote { line-height: 1.5; }
+.balance .balance-filters { position: relative; z-index: 2; overflow: visible; padding: 16px 20px; margin-bottom: 15px; }
+.balance-filter-row { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; }
+.balance-filter-row > label, .balance-category-filter { display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+.balance-filter-row :is(input, select) {
+  min-height: 38px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+.balance-filter-row .primary { margin-left: auto; }
+.balance-category-filter details { position: relative; min-width: 190px; color: var(--text); }
+.balance-category-filter summary { padding: 8px 10px; min-height: 38px; cursor: pointer; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); }
+.balance-category-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 6px 12px; position: absolute; top: calc(100% + 5px); left: 0; z-index: 30; width: 260px; max-width: 70vw; max-height: 320px; overflow-y: auto; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px #0002; }
+.balance-category-options label { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.balance-filter-chip { padding: 5px 9px; font-size: 11px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); color: var(--green); }
+.balance-shortcuts { margin-top: 12px; flex-wrap: wrap; }
+.balance-scope { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 10px; font-size: 12px; }
+.balance-scope span { color: var(--muted); }
+.balance-result .stat { height: 100%; }
+.balance-result.balance-positive strong { color: var(--balance-income); }
+.balance-result.balance-negative strong { color: var(--balance-expense); }
+.balance-stats strong { overflow-wrap: anywhere; }
+.balance-stats .stat-icon:empty { display: none; }
+.balance-stats .stat > div { min-height: 18px; }
+.balance-panels { display: grid; grid-template-columns: minmax(0, 3fr) minmax(245px, 2fr); gap: 16px; margin-bottom: 16px; }
+.balance-panel { min-width: 0; padding: 16px 20px; }
+.balance-panel-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.balance-chart { display: grid; margin-top: 12px; overflow-x: auto; padding: 4px; }
+.balance-chart-tabs { margin-top: 10px; flex-wrap: wrap; }
+.balance-month { display: grid; grid-template-rows: 100px auto; justify-content: stretch; align-items: stretch; gap: 4px; min-width: 0; padding: 2px; color: var(--text); background: transparent; border: 1px solid transparent; border-radius: 6px; }
+.balance-month:is(:hover, [aria-pressed="true"]) { color: var(--green); border-color: var(--line); background: var(--soft); }
+.balance-month:focus-visible { outline-offset: -3px; }
+.balance-month small { font-size: 10px; text-align: center; }
+.balance-bar-track { display: block; position: relative; width: 100%; height: 100%; }
+.balance-bar-track::before { content: ""; position: absolute; inset: 50% -3px auto; border-top: 1px solid var(--line); }
+.balance-bar { position: absolute; inset: auto 22% 50%; background: var(--balance-income); border-radius: 3px 3px 0 0; }
+.balance-bar-negative { top: 50%; bottom: auto; background: var(--balance-expense); border-radius: 0 0 3px 3px; }
+.balance-pair-track::before { top: 100%; }
+.balance-pair-track > span { position: absolute; bottom: 0; width: 28%; border-radius: 3px 3px 0 0; }
+.balance-pair-income { left: 18%; background: var(--balance-income); }
+.balance-pair-expense { right: 18%; background: var(--balance-expense); }
+.balance-legend { display: flex; justify-content: flex-end; gap: 14px; font-size: 11px; color: var(--muted); }
+.balance-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.balance-legend i { width: 8px; height: 8px; display: inline-block; border-radius: 2px; }
+.balance-income-dot { background: var(--balance-income); }
+.balance-expense-dot { background: var(--balance-expense); }
+.balance-categories { display: grid; gap: 4px; list-style: none; padding: 0; margin: 9px 0 0; }
+.balance-categories button { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; width: 100%; border: 1px solid transparent; border-radius: 6px; padding: 5px 7px; background: transparent; color: var(--text); text-align: left; font-size: 12px; }
+.balance-categories button:is(:hover, [aria-pressed="true"]) { border-color: var(--line); background: var(--soft); }
+.balance-category-track { grid-column: 1 / -1; display: block; height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.balance-category-track span { display: block; height: 100%; background: var(--balance-income); }
+.balance-amount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.balance-note { max-width: 320px; white-space: normal; overflow-wrap: anywhere; }
+.balance-expense-form { display: grid; gap: 14px; }
+
+@media (max-width: 900px) {
+  .balance-panels { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .balance-filter-row .primary { margin-left: 0; }
+  .balance .balance-stats { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,46 @@
+.app:not(.dark) {
+  --green: #087f82;
+  --soft: #eaf3f3;
+  --bg: #f3f6f7;
+  --text: #213949;
+  --muted: #647984;
+  --line: #e0e8eb;
+}
+.app.dark { --green: #7bd0cb; --soft: #203b42; --bg: #101c29; --surface: #172a39; --text: #e3eef3; --muted: #9eb5c3; --line: #2c4557; }
+.app .sidebar { background: #122b43; }
+.app .sidebar-toggle { background: #193b53; border-color: #3c6171; color: #e8f5f4; }
+.app .sidebar-toggle:hover, .app .nav-item:hover { background: #1b465b; }
+.sidebar .nav-item { color: #c2d7e1; }
+.sidebar .nav-item.active { background: #d6eeed; color: #12454e; }
+.sidebar .workspace { color: #a1bdca; }
+.app .primary { background: #087f82; border-color: #087f82; }
+.app .primary:hover { background: #06686b; }
+.app .avatar { background: var(--soft); color: var(--green); }
+.app .focus-card { background: var(--soft); color: var(--text); }
+.app .focus-card::after, .app .focus-icon { border-color: var(--line); }
+.app .bar i { background: #4a9e9b; }
+.viex-brand { display: inline-flex; flex-shrink: 0; align-items: center; gap: 10px; color: #122b43; }
+.viex-brand img { display: block; flex-shrink: 0; border-radius: 9px; }
+.viex-wordmark { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+.viex-wordmark strong { font-family: Manrope, Arial, sans-serif; font-size: 25px; letter-spacing: .08em; font-weight: 800; }
+.viex-wordmark span { font-size: 12px; letter-spacing: .14em; color: #087f82; }
+.sidebar .viex-wordmark strong { color: #f3f8fa; font-size: 22px; }
+.sidebar .viex-wordmark span { color: #8ed7d3; font-size: 10px; }
+.sidebar .viex-brand { gap: 8px; }
+.sidebar .viex-brand img { width: 32px; height: 32px; }
+.sidebar-top { gap: 8px; }
+.collapsed .sidebar-top { gap: 12px; }
+.app .sidebar.collapsed .sidebar-top { gap: 8px; }
+.app .sidebar.collapsed .workspace { display: none; }
+.app .sidebar.collapsed nav { margin-top: 18px; }
+.access-brand .viex-brand { margin-bottom: 8px; }
+.access-brand .viex-brand img { width: 64px; height: 64px; }
+.access-brand .viex-wordmark strong { font-size: 34px; }
+.dark .viex-wordmark strong { color: #e3f0f3; }
+.dark .viex-wordmark span { color: #7bd0cb; }
+.access-panel { border-top: 4px solid #087f82; }
+@media (max-width:1150px) and (min-width:761px) {
+  .sidebar .viex-brand img { width: 28px; height: 28px; }
+  .sidebar .viex-wordmark strong { font-size: 17px; }
+  .sidebar .viex-brand { gap: 5px; }
+}

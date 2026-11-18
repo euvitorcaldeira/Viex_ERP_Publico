@@ -1,0 +1,16 @@
+.finance-tabs { margin-bottom: 16px; }
+.finance-actions { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+.finance-actions > label { margin: 0; }
+.undated-invoices { display: grid; gap: 8px; margin: 12px 0 18px; }
+.invoice-date-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line, #e5e7eb); border-radius: 10px; }
+.modal .invoice-date-row label { flex-direction: row; align-items: center; gap: 10px; }
+.invoice-date-row strong { margin-left: auto; }
+.modal .invoice-date-row input[type=checkbox] { width: 16px; height: 16px; padding: 0; }
+.modal .invoice-date-row input[type=date] { width: auto; }
+.open-invoices-body .tabs { flex-wrap: wrap; }
+@media (max-width: 720px) {
+  .finance-actions { align-items: stretch; flex-direction: column; }
+  .finance-actions > label { width: 100%; }
+}
+
+.finance-actions .prepare-message { font-size: 12px; padding: 7px 10px; white-space: nowrap; }

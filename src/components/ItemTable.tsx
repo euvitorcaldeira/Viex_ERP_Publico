@@ -1,0 +1,3 @@
+import { SortableTable } from './SortableTable';
+import { type Romaneio, itemTotal } from '../domain';
+export function ItemTable({record}:{record:Romaneio}){return <div className="table-wrap"><SortableTable><thead><tr><th>Código / Modelo</th><th>Família</th><th>Cor</th><th>Grade e quantidades</th><th>Peças</th></tr></thead><tbody>{record.items.map(item=><tr key={item.id}><td><b>{item.code}</b><small>{item.description}</small></td><td>{item.family||'—'}</td><td>{item.color||'—'}</td><td>{item.sizes.filter(s=>s.quantity>0).map(s=>`${s.size}: ${s.quantity}`).join(' · ')}</td><td>{itemTotal(item)}</td></tr>)}</tbody></SortableTable></div>}
