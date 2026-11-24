@@ -1,0 +1,21 @@
+sequenceDiagram
+  actor Pessoa as Usuário autenticado
+  participant Tela as React no navegador
+  participant Comando as Comando no servidor
+  participant Banco as PostgreSQL
+  Pessoa->>Tela: Registrar recebimento da parcela
+  Tela->>Comando: Parcela, valor, data e chave de idempotência
+  Comando->>Comando: Validar sessão, organização e permissão
+  Comando->>Banco: Iniciar transação e bloquear saldo da parcela
+  Banco-->>Comando: Saldo atual e operação anterior com a mesma chave
+  alt Já processado
+    Comando-->>Tela: Retornar resultado anterior sem duplicar
+  else Valor excede saldo ou dados inválidos
+    Comando->>Banco: Cancelar transação
+    Comando-->>Tela: Erro de validação, nenhum lançamento salvo
+  else Operação válida
+    Comando->>Banco: Inserir recebimento e auditoria com usuário real
+    Comando->>Banco: Confirmar transação
+    Comando-->>Tela: Resultado e saldo atualizado autorizado
+    Tela-->>Pessoa: Atualizar lista e indicadores
+  end

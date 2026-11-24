@@ -1,4 +1,5 @@
 import { Eye, EyeOff, Wallet } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Stat } from '../components/Stat';
 import { money } from '../format';
 
@@ -10,12 +11,12 @@ export function receivableAmount(total: number, visible: boolean) {
 export function ReceivableStat({ label, total, note, visible, onToggle, onActivate }: {
   label: string;
   total: number;
-  note: string;
+  note: ReactNode;
   visible: boolean;
   onToggle?: () => void;
   onActivate?: () => void;
 }) {
-  const toggleLabel = visible ? 'Ocultar total a receber' : 'Mostrar total a receber';
+  const toggleLabel = visible ? 'Ocultar valores financeiros' : 'Mostrar valores financeiros';
   return <Stat
     label={label}
     value={onToggle ? receivableAmount(total, visible) : 'Restrito'}

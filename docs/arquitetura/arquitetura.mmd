@@ -1,0 +1,23 @@
+flowchart LR
+  subgraph Atual[IMPLEMENTADO — protótipo V4]
+    UI[React + TypeScript: telas e formulários] --> Domain[Regras: cálculos, validações e transições]
+    Domain --> Local[Repositório local / localStorage]
+  end
+  subgraph Proposta[PROPOSTO — aplicação definitiva]
+    Browser[Computador ou celular / React reutilizado]
+    Auth[Supabase Auth: identidade e perfil verificados]
+    API[Comandos de servidor / RPC transacional]
+    DB[(PostgreSQL: dados relacionados e permissões)]
+    Files[Storage privado: fotos e PDFs]
+    Backups[Backups de banco e arquivos / restauração testada]
+    Browser -->|Login| Auth
+    Auth -->|Sessão verificada| API
+    Browser -->|HTTPS: comandos e consultas autorizadas| API
+    API -->|Validação + transação + auditoria| DB
+    API -->|Autoriza upload e acesso| Files
+    DB --> Backups
+    Files --> Backups
+  end
+  UI -.->|Reaproveitar componentes| Browser
+  Domain -.->|Reaproveitar regras e testes; validar no servidor| API
+  Local -.->|Substituir persistência local| DB

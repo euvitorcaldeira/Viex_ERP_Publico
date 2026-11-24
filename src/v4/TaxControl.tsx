@@ -1,3 +1,4 @@
+import { useScreenPreference } from '../components/screenPreferences';
 import { SortableTable } from '../components/SortableTable';
 import { useState, type ReactNode } from 'react';
 import { CalendarDays, Check, Undo2 } from 'lucide-react';
@@ -10,9 +11,9 @@ import { Modal } from '../components/Modal';
 type TaxConfiguration = { invoiceId: string; rate: string; date: string; exempt: boolean };
 
 export function TaxControl({ state, commit, navigation }: { state: State; commit: Commit; navigation: ReactNode }) {
-  const [status, setStatus] = useState('Em aberto');
-  const [period, setPeriod] = useState('Todas as datas');
-  const [month, setMonth] = useState(today().slice(0, 7));
+  const [status, setStatus] = useScreenPreference('impostos:situacao','Em aberto');
+  const [period, setPeriod] = useScreenPreference('impostos:periodo','Todas as datas');
+  const [month, setMonth] = useScreenPreference('impostos:mes',today().slice(0, 7));
   const [payment, setPayment] = useState<{ invoiceId: string; date: string } | null>(null);
   const [configuration, setConfiguration] = useState<TaxConfiguration | null>(null);
   const [error, setError] = useState('');
@@ -69,20 +70,23 @@ export function TaxControl({ state, commit, navigation }: { state: State; commit
   }
 
   return <>
+    {navigation}
+    <section className="panel finance-filter-header">
+      <h2>Impostos</h2>
+      <div className="finance-filter-row">
+        <label>Situação<select value={status} onChange={event => setStatus(event.target.value)}><option>Em aberto</option><option>Pagos</option><option>Isentas</option><option>Todos</option></select></label>
+        <label>Período<select aria-label="Período dos impostos" value={period} onChange={event => setPeriod(event.target.value)}><option>Mês</option><option>Sem data</option><option>Todas as datas</option></select></label>
+        {period === 'Mês' && <label>Mês da previsão<input aria-label="Mês da previsão de imposto" type="month" value={month} onChange={event => { if (event.target.value) setMonth(event.target.value); }} /></label>}
+        <span className="filter-total">{rows.length} NF(s) · {money(total)}</span>
+      </div>
+    </section>
     <div className="stats">
       <Stat label="Total de impostos" value={money(state.invoices.reduce((sum, invoice) => sum + (invoice.taxCents || 0), 0))} icon={<CalendarDays />} note="Notas com imposto apurado" />
       <Stat label="Impostos em aberto" value={money(openTaxes.reduce((sum, invoice) => sum + (invoice.taxCents || 0), 0))} icon={<CalendarDays />} note={`${openTaxes.length} NF(s) sem baixa`} />
       <Stat label="Impostos pagos" value={money(paidTaxes.reduce((sum, invoice) => sum + (invoice.taxCents || 0), 0))} icon={<Check />} note={`${paidTaxes.length} NF(s) baixadas`} />
       <Stat label="Notas isentas" value={String(exemptTaxes.length)} icon={<Check />} note="Isenção registrada no histórico" />
     </div>
-    {navigation}
     <section className="panel">
-      <div className="toolbar">
-        <div className="tabs">{['Em aberto', 'Pagos', 'Isentas', 'Todos'].map(item => <button key={item} className={status === item ? 'selected' : ''} onClick={() => setStatus(item)}>{item}</button>)}</div>
-        <label>Período<select aria-label="Período dos impostos" value={period} onChange={event => setPeriod(event.target.value)}><option>Mês</option><option>Sem data</option><option>Todas as datas</option></select></label>
-        {period === 'Mês' && <label>Mês da previsão<input aria-label="Mês da previsão de imposto" type="month" value={month} onChange={event => { if (event.target.value) setMonth(event.target.value); }} /></label>}
-        <span className="filter-total">{rows.length} NF(s) · {money(total)}</span>
-      </div>
       <div className="table-wrap"><SortableTable><thead><tr><th>Nota fiscal / Cliente</th><th>Emissão</th><th>Base da NF</th><th>Alíquota</th><th>Imposto</th><th>Previsão</th><th>Pagamento</th><th>Ações</th></tr></thead><tbody>
         {rows.map(invoice => <tr key={invoice.id}>
           <td><b>NF {invoice.number}</b><small>{invoice.client}</small></td>

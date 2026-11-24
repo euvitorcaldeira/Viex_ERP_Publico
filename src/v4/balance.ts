@@ -37,7 +37,7 @@ export function balanceMovements(state: State): BalanceMovement[] {
   const movements: BalanceMovement[] = [];
 
   for (const receipt of state.receipts) {
-    if (receipt.reversedAt) continue;
+    if (receipt.reversedAt || !receipt.date) continue;
     const invoice = invoices.get(receipt.invoiceId);
     movements.push({
       id: receipt.id, date: receipt.date, category: 'Recebimentos', source: 'receipt',

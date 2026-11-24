@@ -73,3 +73,58 @@ footer{border-top:1px solid var(--line);margin-top:24px;padding:16px 0 20px;alig
 @media(max-width:900px){.header-eyebrow{display:none}.header-page-description{display:none}.shell>header .global-search{width:130px}.header-title-line h1{font-size:16px}}
 @media(max-width:760px){.shell>header{height:56px;padding:0 14px}.shell>header .global-search{display:none}main{padding:14px 16px 0}.page-heading{margin-bottom:18px}.page-heading h1{font-size:25px}footer{gap:8px}.footer-status{margin-left:0!important;flex-basis:100%}.internal-workshop-setting .internal-workshop-form{grid-template-columns:1fr;align-items:stretch}.finance-tabs{margin:0 14px 10px}.billing-summary-row{grid-template-columns:1fr}.billing-summary-row .copy-summary{justify-self:start}.billing-fields{grid-template-columns:1fr 1fr}.billing-fields>label:first-child{grid-column:1/-1}.billing-payment-dates,.billing-tax-fields{grid-template-columns:1fr 1fr}.modal-head .billing-record-codes{font-size:13px}}
 @media(max-width:760px){.shell>header{height:60px;padding:0 12px;gap:8px}.header-page-context{flex:1}.header-eyebrow,.header-page-description{display:none}.header-title-line h1{max-width:100%;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.header-new-record{width:34px;height:34px;padding:0;border-radius:7px}.header-new-record span{display:none}.header-new-record svg{width:16px;height:16px}.header-actions{gap:2px}.header-actions .icon-btn{width:29px}.avatar{width:30px;height:30px}.system-identity-settings .identity-setting-row{align-items:stretch}.identity-setting-control{flex-direction:column;align-items:stretch}.identity-setting-control .primary{align-self:flex-start}}
+.record-form-compact .form-grid { gap: 10px 14px; }
+.record-form-compact .model-editor { padding: 12px; margin: 8px 0 12px; }
+.record-form-compact .attachment { margin-top: 12px; padding: 12px; }
+.modal:has(.record-form-compact) .modal-head { padding-block: 14px; }
+.modal:has(.record-form-compact) .modal-footer { padding-block: 12px; }
+.modal:has(.record-form-compact) .stepper { padding-block: 8px; }
+.modal .record-form-compact { padding-block: 14px; }
+.record-form-compact .section-title { margin-block: 10px 6px; }
+.record-form-compact .model-editor .section-title { margin-top: 0; }
+.record-form-compact .form-grid :is(input, select) { min-height: 34px; padding-block: 7px; }
+.record-form-compact .size-grid { margin-block: 8px; }
+@media (min-width: 800px) {
+  .modal .record-form-compact > .form-grid,
+  .modal .record-form-compact .model-editor > .form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.record-form-compact > .form-grid + .section-title { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); }
+.modal:has(.record-review-compact) .modal-head { padding-block: 14px; }
+.modal:has(.record-review-compact) .stepper { padding-block: 8px; }
+.modal:has(.record-review-compact) .modal-footer { padding-block: 12px; }
+.modal .record-review-compact { padding-block: 14px; }
+.record-review-compact .review-summary { grid-template-columns: repeat(auto-fit, minmax(min(125px, 100%), 1fr)); gap: 10px 16px; margin-bottom: 12px; }
+.record-review-compact .review-summary small { margin-bottom: 3px; }
+.modal .record-review-compact > .table-wrap { margin-block: 10px; }
+.record-review-compact .price-review { margin-top: 12px; padding-top: 10px; }
+.record-review-compact .price-review h3 { margin-block: 0 6px; }
+.record-review-compact .price-review .form-grid { gap: 8px 12px; }
+.record-review-compact .price-review .model-editor { margin: 0; padding: 10px 12px; }
+.record-review-compact .price-review .model-editor input { padding-block: 7px; }
+.modal .record-review-compact > p { margin-block: 8px; }
+.record-form-compact .pieces-total { display: inline-block; padding: 5px 9px; border-radius: 6px; color: var(--green); background: var(--soft); font-size: 14px; font-weight: 750; }
+.record-review-table td { padding: 9px 12px; }
+.review-price-inputs { display: grid; gap: 6px; min-width: 112px; }
+.review-price-inputs input { width: 100%; padding-block: 7px; }
+.modal:has(.billing-register) .modal-head, .modal:has(.billing-register) .modal-footer { padding-block: 14px; }
+.modal .billing-register { padding-block: 15px; }
+.modal .billing-register .billing-summary-row textarea.nf-summary { min-height: 76px; max-height: 180px; resize: vertical; }
+.billing-register .billing-section-title { margin-block: 10px 5px; }
+.modal .billing-register .check-label { margin-block: 10px; }
+.billing-register .billing-payment-dates { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px 12px; }
+.billing-register .billing-tax-fields { grid-template-columns: minmax(105px, 125px) minmax(155px, 220px) minmax(120px, 1fr); align-items: end; }
+.billing-amount { align-self: end; display: grid; gap: 4px; padding: 6px 10px; color: var(--text); background: var(--soft); border-radius: 6px; font-size: 12px; }
+.billing-percent { position: relative; display: block; }
+.modal .billing-percent input { width: 100%; padding-right: 28px; appearance: textfield; }
+.billing-percent input::-webkit-inner-spin-button { appearance: none; }
+.billing-percent > span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+@media (max-width: 560px) {
+  .billing-register .billing-tax-fields { grid-template-columns: minmax(90px, 1fr) minmax(130px, 2fr); }
+  .billing-register .billing-tax-fields .billing-amount { grid-column: 1 / -1; }
+}
+.billing-register .billing-fields { grid-template-columns: minmax(85px,.8fr) minmax(150px,1.4fr) minmax(110px,1fr) minmax(80px,.65fr) minmax(140px,1.3fr); align-items: end; }
+.billing-register .billing-payment-dates { margin-top: 10px; }
+@media (max-width: 760px) {
+  .billing-register .billing-fields { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .billing-register .billing-fields > label:first-child { grid-column: auto; }
+}

@@ -11,9 +11,11 @@ import { createLocalUser, updateLocalUser } from '../localApi';
 
 const isUser=(item:Client|UserProfile):item is UserProfile=>'email' in item && 'role' in item;
 
-export function Registry({state,commit,localMode=false,onUsersChange}:{state:State;commit:Commit;localMode?:boolean;onUsersChange?:(users:NonNullable<State['users']>)=>void}){
- const [tab,setTab]=useState('Clientes'),[client,setClient]=useState<Client|null>(null),[user,setUser]=useState<UserProfile|null>(null),[password,setPassword]=useState(''),[error,setError]=useFormError(),[inactive,setInactive]=useState(false),[users,setUsers]=useState(state.users||[]);
- const tabs=localMode?['Clientes','Funcionários','Oficinas','Usuários']:['Clientes','Funcionários','Oficinas','Usuários'];
+export const registrySections = ['Clientes','Funcionários','Oficinas','Usuários'] as const;
+export type RegistrySection = typeof registrySections[number];
+
+export function Registry({tab,state,commit,localMode=false,onUsersChange}:{tab:RegistrySection;state:State;commit:Commit;localMode?:boolean;onUsersChange?:(users:NonNullable<State['users']>)=>void}){
+ const [client,setClient]=useState<Client|null>(null),[user,setUser]=useState<UserProfile|null>(null),[password,setPassword]=useState(''),[error,setError]=useFormError(),[inactive,setInactive]=useState(false),[users,setUsers]=useState(state.users||[]);
  function closeUser(){setUser(null);setPassword('');setError('')}
  function saveAccount(){
   if(!user)return;
@@ -32,10 +34,11 @@ export function Registry({state,commit,localMode=false,onUsersChange}:{state:Sta
  }
  const rows=tab==='Clientes'?(state.clients||[]):users;
  return <>
-  <div className="module-actions"><div className="tabs">{tabs.map(t=><button key={t} className={tab===t?'selected':''} onClick={()=>{setTab(t);setInactive(false);setError('')}}>{t}</button>)}</div>
+  {(tab==='Clientes'||tab==='Usuários')&&<div className="module-actions">
+   <h2>{tab}</h2>
    {tab==='Clientes'&&<button className="primary" onClick={()=>{setClient({id:uid(),name:'',active:true});setError('')}}>Cadastrar cliente</button>}
    {tab==='Usuários'&&<button className="primary" onClick={()=>{setUser({id:uid(),name:'',email:'',role:'Operação',active:true});setPassword('');setError('')}}>{localMode?'Convidar usuário':'Cadastrar usuário'}</button>}
-  </div>
+  </div>}
   {tab==='Funcionários'&&<Employees key="registry-employees" state={state} commit={commit} mode="registry"/>}
   {tab==='Oficinas'&&<Workshops state={state} commit={commit} mode="registry" onOpen={()=>{}}/>}
   {(tab==='Clientes'||tab==='Usuários')&&<section className="panel"><div className="toolbar"><label className="check-label"><input type="checkbox" checked={inactive} onChange={e=>setInactive(e.target.checked)}/> Mostrar inativos</label></div>

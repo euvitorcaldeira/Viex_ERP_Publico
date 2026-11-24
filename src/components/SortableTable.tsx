@@ -1,7 +1,8 @@
-import { Children, Fragment, cloneElement, isValidElement, useState, type ReactElement, type ReactNode, type TableHTMLAttributes } from 'react';
+import { Children, Fragment, cloneElement, isValidElement, useContext, type ReactElement, type ReactNode, type TableHTMLAttributes } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { sortTableRows, type ColumnSort, type SortValue } from './tableSort';
 import './sortableTable.css';
+import { ScreenPreferenceScope, useScreenPreference } from './screenPreferences';
 
 type NodeProps = { children?: ReactNode; value?: string | number; defaultValue?: string | number; 'data-sort-value'?: SortValue };
 type Element = ReactElement<NodeProps>;
@@ -23,11 +24,17 @@ function textValue(children: ReactNode): string {
   }).join(' ').replace(/\s+/g, ' ').trim();
 }
 
-export function SortableTable({ children, sort: controlledSort, onSortChange, ...props }: TableHTMLAttributes<HTMLTableElement> & {
+export function SortableTable({ children, sort: controlledSort, defaultSort, onSortChange, ...props }: TableHTMLAttributes<HTMLTableElement> & {
   sort?: ColumnSort | null;
+  defaultSort?: ColumnSort;
   onSortChange?: (sort: ColumnSort) => void;
 }) {
-  const [localSort, setLocalSort] = useState<ColumnSort | null>(null);
+  const scope = useContext(ScreenPreferenceScope);
+  const headings = elements(children).filter(section => section.type === 'thead').flatMap(section =>
+    elements(section.props.children).flatMap(row => elements(row.props.children).map(cell => textValue(cell.props.children))));
+  const [localSort, setLocalSort] = useScreenPreference<ColumnSort | null>(
+    'sort:' + JSON.stringify([scope, headings]), defaultSort ?? null,
+  );
   const sort = controlledSort === undefined ? localSort : controlledSort;
 
   function toggle(column: number) {

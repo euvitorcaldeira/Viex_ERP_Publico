@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import os
+import json
 import queue
 import sys
 import threading
 import webbrowser
 from pathlib import Path
+from urllib.request import urlopen
 
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 ASSETS = Path(getattr(sys, "_MEIPASS", ROOT)) / "dist" / "brand"
@@ -18,6 +20,20 @@ def create_server():
     if os.environ.get("VIEX_PORT"):
         http_server.PORT = int(os.environ["VIEX_PORT"])
     return http_server.serve()
+
+
+def existing_server_address():
+    """Return the local VIEX URL when another launcher already owns it."""
+    port = int(os.environ.get("VIEX_PORT", "8765"))
+    address = f"http://127.0.0.1:{port}/"
+    try:
+        with urlopen(f"{address}api/status", timeout=1) as response:
+            status = json.load(response)
+        if isinstance(status, dict) and "setupRequired" in status and "authenticated" in status:
+            return address
+    except (OSError, ValueError, TypeError):
+        pass
+    return None
 
 
 def console_main():
@@ -35,6 +51,11 @@ def console_main():
 def main():
     if os.environ.get("DALEX_OPEN_BROWSER", "1").lower() in ("0", "false") or "--console" in sys.argv:
         return console_main()
+
+    existing_address = existing_server_address()
+    if existing_address:
+        webbrowser.open(existing_address)
+        return 0
 
     import tkinter as tk
     from tkinter import messagebox

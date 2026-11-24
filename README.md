@@ -27,3 +27,5 @@ O sistema local não publica os dados nem permite acesso remoto por padrão. Fa�
 - `docs/` e arquivos Markdown — arquitetura, guias e histórico do projeto.
 
 As instruções operacionais locais estão em [`README_LOCAL.md`](README_LOCAL.md), e as decisões técnicas em [`ARQUITETURA_LOCAL.md`](ARQUITETURA_LOCAL.md).
+
+Para colocar o sistema online, consulte o [roteiro de implantação em VPS](docs/IMPLANTACAO.md).

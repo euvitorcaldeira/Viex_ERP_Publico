@@ -1,3 +1,4 @@
+import { useScreenPreference } from '../components/screenPreferences';
 import { SortableTable } from '../components/SortableTable';
 import { useState } from 'react';
 import { CircleOff, ClipboardList, Pencil, Plus, RotateCcw, Wallet } from 'lucide-react';
@@ -22,7 +23,7 @@ export function Workshops({ state, commit, onOpen, mode = 'all' }: WorkshopsProp
   const [editing, setEditing] = useState<Workshop | null>(null);
   const [detailId, setDetailId] = useState('');
   const [payment, setPayment] = useState<{ id: string; charges: string[] } | null>(null);
-  const [showInactive, setShowInactive] = useState(false);
+  const [showInactive, setShowInactive] = useScreenPreference('oficinas:mostrar-inativas:'+mode,false);
   const [error, setError] = useFormError();
 
   const detail = state.workshops.find(workshop => workshop.id === detailId);

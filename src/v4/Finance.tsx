@@ -1,10 +1,11 @@
+import { useScreenPreference } from '../components/screenPreferences';
 import { SortableTable } from '../components/SortableTable';
 import { useFormError } from '../components/useFormError';
-import { useState } from 'react';
-import { Check, FileText, Pencil, HandCoins, Undo2, Download } from 'lucide-react';
-import { type State, type Bill, type Receipt, receivableTotal, installmentReceived, monthReceipts, receive, reverseReceipt } from '../v3/domain';
+import { useId, useRef, useState } from 'react';
+import { Check, FileText, Pencil, HandCoins, Undo2, Download, CalendarDays } from 'lucide-react';
+import { type State, type Bill, type Receipt, installmentReceived, monthReceipts, receive, reverseReceipt } from '../v3/domain';
 import { type Commit, History } from '../v3/common';
-import { money, dateLabel, today, cents } from '../format';
+import { dateLabel, today, cents } from '../format';
 import { Stat } from '../components/Stat';
 import { Modal } from '../components/Modal';
 import { compareFinancial, updateDueDate, type FinancialSort } from './domain';
@@ -15,6 +16,61 @@ import { Balance } from './BalancePanel';
 import { ActionIcon } from '../components/ActionIcon';
 import { ArchiveMovementButton } from './ArchiveMovementButton';
 import './finance.css';
+
+const monthNames = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+function FinanceMonthPicker({ label, value, allowUndated, onChange }: {
+  label: string; value: string; allowUndated: boolean; onChange: (month: string) => void;
+}) {
+  const current = today().slice(0, 7);
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  const [year, setYear] = useState(Number(current.slice(0, 4)));
+  const trigger = useRef<HTMLButtonElement>(null);
+  const selected = /^\d{4}-\d{2}$/.test(value);
+  const caption = selected ? new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(value + '-01T00:00:00Z')) : value === 'undated' ? 'Sem data' : value === 'overdue' ? 'Vencidas' : 'Todos os meses';
+
+  function close() {
+    setOpen(false);
+    trigger.current?.focus();
+  }
+
+  function choose(month: string) {
+    onChange(month);
+    close();
+  }
+
+  return <div className="finance-month-filter" onBlur={event => {
+    if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+  }} onKeyDown={event => {
+    if (event.key === 'Escape' && open) { event.stopPropagation(); close(); }
+  }}>
+    <span id={id}>{label}</span>
+    <button type="button" className="finance-month-trigger" ref={trigger} aria-expanded={open} aria-labelledby={id + ' ' + id + '-value'} onClick={() => {
+      if (!open) setYear(Number((selected ? value : current).slice(0, 4)));
+      setOpen(!open);
+    }}><span id={id + '-value'}>{caption}</span><CalendarDays size={15} /></button>
+    {open && <div className="finance-month-popup" role="group" aria-label={label}>
+      <div className="finance-month-year">
+        <button type="button" aria-label="Ano anterior" disabled={year <= 1} onClick={() => setYear(year - 1)}>‹</button>
+        <strong aria-live="polite">{year}</strong>
+        <button type="button" aria-label="Próximo ano" disabled={year >= 9999} onClick={() => setYear(year + 1)}>›</button>
+      </div>
+      <div className="finance-month-grid">{monthNames.map((name, index) => {
+        const month = String(year).padStart(4, '0') + '-' + String(index + 1).padStart(2, '0');
+        return <button type="button" key={name} aria-pressed={value === month} onClick={() => choose(month)}>{name}</button>;
+      })}</div>
+      <div className="finance-month-actions">
+        <button type="button" className="text-link" onClick={() => choose(allowUndated ? current : '')}>{allowUndated ? 'Redefinir' : 'Limpar'}</button>
+        {allowUndated && <>
+          <button type="button" className="text-link" onClick={() => choose('undated')}>Sem data</button>
+          <button type="button" className="text-link" onClick={() => choose('overdue')}>Vencidas</button>
+        </>}
+        <button type="button" className="text-link" onClick={() => choose(current)}>Este mês</button>
+      </div>
+    </div>}
+  </div>;
+}
 
 function ProductLinks({ state, recordIds, onOpen }: { state: State; recordIds: string[]; onOpen: (id: string) => void }) {
   return <div className="finance-product-list">{recordIds.map(id => {
@@ -29,24 +85,41 @@ function ProductLinks({ state, recordIds, onOpen }: { state: State; recordIds: s
 }
 
 export function FinanceV4({ state, commit, onOpen, showReceivableTotal, onToggleReceivableTotal }: { state: State; commit: Commit; onOpen: (id: string) => void; showReceivableTotal: boolean; onToggleReceivableTotal: () => void }) {
-  const [sort, setSort] = useState<FinancialSort>('Previsão mais próxima');
+  const [sort, setSort] = useScreenPreference<FinancialSort>('financeiro:ordem','Previsão mais próxima');
   const [schedule, setSchedule] = useState<{ invoiceId: string; partId: string; date: string } | null>(null);
-  const [filter, setFilter] = useState('Em aberto');
-  const [period, setPeriod] = useState(today().slice(0, 7));
+  const [filter, setFilter] = useScreenPreference('financeiro:situacao','Em aberto');
+  const [period, setPeriod] = useScreenPreference('financeiro:mes',today().slice(0, 7));
+  const [openMode, setOpenMode] = useScreenPreference('financeiro:filtro-vencimento','');
   const [payment, setPayment] = useState<{ invoice: Bill; partId: string } | null>(null);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(today());
   const [error, setError] = useFormError();
   const [historyId, setHistoryId] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
-  const [view, setView] = useState('Contas a Receber');
+  const [view, setView] = useScreenPreference('financeiro:aba','Contas a Receber');
 
   const rows = state.invoices.flatMap(invoice => invoice.installments.map((part, index) => ({ invoice, part, index, paid: installmentReceived(state, part.id) })));
-  const visible = rows.filter(row => filter === 'Todas' || row.paid < row.part.amountCents);
-  const received = monthReceipts(state, period);
+  const openRows = rows.filter(row => row.paid < row.part.amountCents);
+  const todayDate = today();
+  const openPeriod = period || todayDate.slice(0, 7);
+  const activeOpenMode = filter === 'Em aberto' ? openMode : '';
+  const selectedOpenRows = openRows.filter(({ part }) => {
+    if (activeOpenMode === 'undated') return !part.dueDate;
+    if (activeOpenMode === 'overdue') return !!part.dueDate && part.dueDate < todayDate;
+    return part.dueDate.startsWith(openPeriod);
+  });
+  const overdueRows = openRows.filter(({ part }) => part.dueDate && part.dueDate < todayDate);
+  const undatedRows = openRows.filter(({ part }) => !part.dueDate);
+  const openTotal = openRows.reduce((sum, row) => sum + row.part.amountCents - row.paid, 0);
+  const openBalance = selectedOpenRows.reduce((sum, row) => sum + row.part.amountCents - row.paid, 0);
+  const openScope = activeOpenMode === 'undated' ? 'Sem data' : activeOpenMode === 'overdue' ? 'Vencidas' : openPeriod.split('-').reverse().join('/');
+  const visible = [...selectedOpenRows];
+  const receivedPeriod = filter === 'Recebidas' ? period : openPeriod;
+  const received = monthReceipts(state, receivedPeriod);
+  const receivedAmount = receivableAmount(received.reduce((sum, row) => sum + row.amountCents, 0), showReceivableTotal);
   const periodRows = state.receipts.filter(receipt => receipt.date.startsWith(period));
   const balanceByInvoice = new Map<string, number>();
-  for (const { invoice, part, paid } of rows) {
+  for (const { invoice, part, paid } of selectedOpenRows) {
     balanceByInvoice.set(invoice.id, (balanceByInvoice.get(invoice.id) ?? 0) + part.amountCents - paid);
   }
   const openInvoices = state.invoices.flatMap(invoice => {
@@ -72,7 +145,7 @@ export function FinanceV4({ state, commit, onOpen, showReceivableTotal, onToggle
   }
 
   function undo(receipt: Receipt) {
-    if (window.confirm(`Desfazer o recebimento de ${money(receipt.amountCents)}? O saldo será reaberto e a correção ficará no histórico.`)) {
+    if (window.confirm(`Desfazer o recebimento de ${receivableAmount(receipt.amountCents, showReceivableTotal)}? O saldo será reaberto e a correção ficará no histórico.`)) {
       commit(state => reverseReceipt(state, receipt.id), 'Recebimento desfeito com histórico.');
     }
   }
@@ -83,36 +156,56 @@ export function FinanceV4({ state, commit, onOpen, showReceivableTotal, onToggle
       : view === 'Balanço mensal'
         ? <Balance state={state} commit={commit} navigation={financeNavigation} />
       : <>
-        <div className="stats three">
-          <ReceivableStat
-            label="A receber"
-            total={receivableTotal(state)}
-            note="Saldo pendente de todas as NFs"
-            visible={showReceivableTotal}
-            onToggle={onToggleReceivableTotal}
-            onActivate={() => setFilter('Em aberto')}
-          />
-          <button className="stat-button" onClick={() => setFilter('Recebidas')}><Stat label="Recebido" value={money(received.reduce((sum, row) => sum + row.amountCents, 0))} icon={<Check />} note={`Recebimentos efetivos em ${period.split('-').reverse().join('/')}`} /></button>
-          <Stat label="Parcelas em aberto" value={String(rows.filter(row => row.paid < row.part.amountCents).length)} icon={<FileText />} note="Inclui parcelas parcialmente recebidas" />
-        </div>
         {financeNavigation}
-        <section className="panel">
-          <div className="panel-heading">
-            <div><h2>Contas a Receber</h2><p>Uma NF consolidada gera um único conjunto de parcelas.</p></div>
-            <div className="finance-actions">
-              <button className="secondary prepare-message" disabled={!openInvoices.length} onClick={() => setExportOpen(true)}>
+        <section className="panel finance-filter-header">
+          <h2>Contas a Receber</h2>
+          <div className="finance-filter-row">
+            <label>Situação<select value={filter} onChange={event => setFilter(event.target.value)}>
+              <option>Em aberto</option><option>Recebidas</option>
+            </select></label>
+            <FinanceMonthPicker
+              label={filter === 'Em aberto' ? 'Mês de vencimento' : 'Mês do recebimento'}
+              value={filter === 'Em aberto' ? openMode || openPeriod : period}
+              allowUndated={filter === 'Em aberto'}
+              onChange={month => {
+                const special = month === 'undated' || month === 'overdue';
+                setOpenMode(special ? month : '');
+                if (!special) setPeriod(month);
+              }}
+            />
+            <label>Ordenar por<select aria-label="Ordenar financeiro" value={sort} onChange={event => setSort(event.target.value as FinancialSort)}>{['Maior valor', 'Menor valor', 'Número da NF', 'Previsão mais próxima', 'Previsão mais distante'].map(item => <option key={item}>{item}</option>)}</select></label>
+            <button className="secondary prepare-message" disabled={!openInvoices.length} onClick={() => setExportOpen(true)}>
                 <Download size={15} />Exportar em aberto · {openInvoices.length}
               </button>
-              <label>Período dos recebimentos<input aria-label="Período dos recebimentos" type="month" value={period} onChange={event => { if (event.target.value) { setPeriod(event.target.value); setFilter('Recebidas'); } }} /></label>
-            </div>
-          </div>
-          <div className="toolbar">
-            <div className="tabs">{['Em aberto', 'Recebidas', 'Todas'].map(item => <button key={item} className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)}>{item}</button>)}</div>
-            <label>Ordenar por<select aria-label="Ordenar financeiro" value={sort} onChange={event => setSort(event.target.value as FinancialSort)}>{['Maior valor', 'Menor valor', 'Número da NF', 'Previsão mais próxima', 'Previsão mais distante'].map(item => <option key={item}>{item}</option>)}</select></label>
             <span className="filter-total">{filter === 'Recebidas'
-              ? `${received.length} recebimento(s) · ${money(received.reduce((sum, row) => sum + row.amountCents, 0))}`
+              ? `${received.length} recebimento(s) · ${receivedAmount}`
               : `${visible.length} parcela(s) · ${receivableAmount(visible.reduce((sum, row) => sum + row.part.amountCents - row.paid, 0), showReceivableTotal)}`}</span>
           </div>
+        </section>
+        <div className={filter === 'Recebidas' ? 'stats two' : 'stats three'}>
+          {filter === 'Em aberto' ? <>
+            <ReceivableStat
+              label={`A receber · ${openScope}`}
+              total={openBalance}
+              note={<span className="finance-filter-subtotal"><span>Saldo total em aberto</span><b>{receivableAmount(openTotal, showReceivableTotal)}</b></span>}
+              visible={showReceivableTotal}
+              onToggle={onToggleReceivableTotal}
+              onActivate={() => setOpenMode('')}
+            />
+            <Stat label="Vencidas" value={receivableAmount(overdueRows.reduce((sum, row) => sum + row.part.amountCents - row.paid, 0), showReceivableTotal)}
+              icon={<CalendarDays />} note={`${overdueRows.length} parcela(s) vencida(s)`}
+              onActivate={() => { setOpenMode('overdue'); setSort('Previsão mais próxima'); }} />
+            <Stat label="Sem data" value={receivableAmount(undatedRows.reduce((sum, row) => sum + row.part.amountCents - row.paid, 0), showReceivableTotal)}
+              icon={<FileText />} note={`${undatedRows.length} parcela(s) sem previsão`}
+              onActivate={() => setOpenMode('undated')} />
+          </> : <>
+            <ReceivableStat label="Recebido" total={received.reduce((sum, row) => sum + row.amountCents, 0)}
+              visible={showReceivableTotal} onToggle={onToggleReceivableTotal}
+              note={receivedPeriod ? `Recebimentos efetivos em ${receivedPeriod.split('-').reverse().join('/')}` : 'Recebimentos de todos os meses'} />
+            <Stat label="Pagamentos registrados" value={String(received.length)} icon={<Check />} note="Recebimentos ativos no período" />
+          </>}
+        </div>
+        <section className="panel">
           <div className="table-wrap">
             {filter === 'Recebidas'
               ? <SortableTable key={sort+"-"+filter} className="finance-table"><thead><tr><th>NF / Cliente</th><th>Código / Item</th><th>Recebido em</th><th>Valor</th><th>Situação</th><th>Ações</th></tr></thead><tbody>
@@ -121,7 +214,7 @@ export function FinanceV4({ state, commit, onOpen, showReceivableTotal, onToggle
                   return <tr key={receipt.id}>
                     <td><button className="text-link" onClick={() => setHistoryId(invoice.id)}>NF {invoice.number}</button><small>{invoice.client}</small></td>
                     <td data-sort-value={invoice.recordIds.flatMap(id => state.records.find(record => record.id === id)?.items.map(item => item.code) ?? []).join(" ")}><ProductLinks state={state} recordIds={invoice.recordIds} onOpen={onOpen} /></td>
-                    <td>{dateLabel(receipt.date)}</td><td>{money(receipt.amountCents)}</td>
+                    <td>{receipt.dateUnknown && !receipt.date ? 'Pago — data desconhecida' : dateLabel(receipt.date)}</td><td>{receivableAmount(receipt.amountCents, showReceivableTotal)}</td>
                     <td><span className={'badge ' + (receipt.reversedAt ? 'waiting' : 'done')}>{receipt.reversedAt ? 'Desfeito' : 'Recebido'}</span></td>
                     <td><div className="inline-actions">{!receipt.reversedAt && <ActionIcon label="Estornar recebimento" icon={<Undo2 size={16} />} onClick={() => undo(receipt)} />}<ArchiveMovementButton commit={commit} kind="receipts" movementId={receipt.id} reversed={!!receipt.reversedAt} /></div></td>
                   </tr>;
@@ -132,15 +225,15 @@ export function FinanceV4({ state, commit, onOpen, showReceivableTotal, onToggle
                   <td><button className="text-link" onClick={() => setHistoryId(invoice.id)}>NF {invoice.number}</button><small>{invoice.client}</small></td>
                   <td data-sort-value={invoice.recordIds.flatMap(id => state.records.find(record => record.id === id)?.items.map(item => item.code) ?? []).join(" ")}><ProductLinks state={state} recordIds={invoice.recordIds} onOpen={onOpen} /></td>
                   <td>{index + 1}/{invoice.installments.length}</td><td>{part.dueDate ? dateLabel(part.dueDate) : 'A definir'}</td>
-                  <td>{money(part.amountCents)}<small>Saldo: {money(part.amountCents - paid)}</small></td>
+                  <td>{receivableAmount(part.amountCents, showReceivableTotal)}<small>Saldo: {receivableAmount(part.amountCents - paid, showReceivableTotal)}</small></td>
                   <td><span className={'badge ' + (paid === part.amountCents ? 'done' : 'waiting')}>{paid === part.amountCents ? 'Recebido' : paid > 0 ? 'Parcialmente recebido' : 'Em aberto'}</span></td>
                   <td><div className="inline-actions"><ActionIcon label="Editar previsão" icon={<Pencil size={16} />} onClick={() => { setSchedule({ invoiceId: invoice.id, partId: part.id, date: part.dueDate }); setError(''); }} />{paid < part.amountCents && <ActionIcon label="Registrar recebimento" icon={<HandCoins size={16} />} onClick={() => openPayment(invoice, part.id, part.amountCents - paid)} />}</div></td>
                 </tr>)}
               </tbody></SortableTable>}
-            {(filter === 'Recebidas' ? !periodRows.length : !visible.length) && <div className="empty">Nenhum registro neste filtro.</div>}
+            {((filter === 'Recebidas') ? !periodRows.length : !visible.length) && <div className="empty">Nenhum registro neste filtro.</div>}
           </div>
         </section>
-        <p className="footnote">O período considera a data efetiva do recebimento. Em aberto e Todas mantêm os saldos completos, sem ocultar parcelas de outros meses.</p>
+        <p className="footnote">As parcelas em aberto seguem o mês do vencimento. Os recebimentos seguem o mês do pagamento.</p>
         {exportOpen && <OpenInvoicesDialog
           openInvoices={openInvoices}
           undatedIds={rows.filter(row => !row.part.dueDate && row.paid < row.part.amountCents).map(row => row.invoice.id)}

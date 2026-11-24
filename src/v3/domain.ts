@@ -9,7 +9,7 @@ export interface Production extends Omit<Romaneio,'invoice'> { invoiceId:string|
 export type ProductionInput=Romaneio&Partial<Pick<Production,'clientId'|'clientOrder'|'receivedOn'|'execution'|'pricing'>>&{pricingReentered?:boolean};
 export interface InvoiceLine { romaneioId:string; code:string; description:string; quantity:number; unitCents:number }
 export interface Bill { id:string; number:string; client:string; recordIds:string[]; issueDate:string; totalCents:number; lines:InvoiceLine[]; installments:Omit<Installment,'receivedOn'>[]; consolidationAuthorized:boolean; taxRateBps?:number; taxCents?:number; taxDueDate?:string; taxPaidAt?:string; taxExempt?:boolean }
-export interface Receipt { id:string; invoiceId:string; installmentId:string; date:string; amountCents:number; reversedAt:string|null }
+export interface Receipt { id:string; invoiceId:string; installmentId:string; date:string; dateUnknown?:boolean; amountCents:number; reversedAt:string|null }
 export interface Employee { id:string; name:string; role:string; dailyCents:number; pix:string; active:boolean; attendanceStartDate?:string }
 export type AttendanceStatus='Presente'|'Falta'|'Não trabalhado';
 export interface Attendance { employeeId:string; date:string; status:AttendanceStatus; dailyCents:number; overtimeCents?:number; earlyDepartureDeductionCents?:number; note?:string }
@@ -107,7 +107,7 @@ export function finishProduction(state:State,id:string,pricing:Pricing[]):State 
 }
 export function updateProductionInfo(state:State,id:string,patch:Partial<Pick<Production,'stage'|'deliveredOn'|'divergence'>>):State {
  const old=state.records.find(r=>r.id===id);requireThat(old,'Romaneio não encontrado.');
- if(patch.stage){requireThat(!financiallyLocked(old!,state),'Desfaça o faturamento ou pagamento da oficina antes de retornar a etapa.');requireThat((old!.stage==='Em fila'&&patch.stage==='Em produção')||(old!.stage==='Em produção'&&patch.stage==='Em fila')||(old!.stage==='Concluído'&&patch.stage==='Em produção'),'Transição de produção inválida.');}
+ if(patch.stage){requireThat(!financiallyLocked(old!,state),'Desfaça o faturamento ou pagamento da oficina antes de retornar a etapa.');requireThat((old!.stage==='Em fila'&&patch.stage==='Em produção')||(old!.stage==='Em produção'&&(patch.stage==='Em fila'||patch.stage==='Concluído'))||(old!.stage==='Concluído'&&patch.stage==='Em produção'),'Transição de produção inválida.');}
  if(patch.deliveredOn)requireThat(validDate(patch.deliveredOn)&&patch.deliveredOn<=today(),'Informe uma data de entrega válida até hoje.');
  const next={...old!,...patch};return audit({...state,records:state.records.map(r=>r.id===id?next:r)},id,'Dados de produção atualizados',old,next);
 }

@@ -366,7 +366,7 @@ class Store:
             part = installments.get(receipt.get("installmentId"))
             self._require(part is not None and part[0] == receipt.get("invoiceId"), "Recebimento sem parcela válida.")
             self._require(type(receipt.get("amountCents")) is int and receipt["amountCents"] > 0, "Valor de recebimento inválido.")
-            self._require(self._valid_date(receipt.get("date")) and receipt["date"]>=invoice_by_id[receipt["invoiceId"]]["issueDate"], "Data de recebimento inválida.")
+            self._require((receipt.get("date") == "" and receipt.get("dateUnknown") is True) or (self._valid_date(receipt.get("date")) and receipt["date"]>=invoice_by_id[receipt["invoiceId"]]["issueDate"]), "Data de recebimento inválida.")
             if not receipt.get("reversedAt"):
                 pid = receipt["installmentId"]
                 paid_by_part[pid] = paid_by_part.get(pid, 0) + receipt["amountCents"]

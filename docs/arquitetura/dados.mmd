@@ -1,0 +1,17 @@
+erDiagram
+  CLIENTE ||--o{ ROMANEIO : possui
+  ROMANEIO ||--|{ MODELO_ROMANEIO : contem
+  MODELO_ROMANEIO ||--|{ QUANTIDADE_TAMANHO : distribui
+  MODELO_ROMANEIO ||--o{ PRECIFICACAO : preserva
+  OFICINA o|--o{ PRECIFICACAO : executa_se_terceirizada
+  ROMANEIO ||--o| NOTA_ROMANEIO : vincula_uma_vez
+  NOTA ||--|{ NOTA_ROMANEIO : consolida
+  NOTA ||--|{ PARCELA : gera
+  PARCELA ||--o{ RECEBIMENTO : recebe_total_ou_parcial
+  RECEBIMENTO ||--o| REVERSAO_RECEBIMENTO : pode_ser_desfeito
+  FUNCIONARIO ||--o{ FREQUENCIA : registra
+  FUNCIONARIO ||--o{ PAGAMENTO_FUNCIONARIO : recebe
+  OFICINA ||--o{ PAGAMENTO_OFICINA : recebe
+  PAGAMENTO_OFICINA ||--|{ ALOCACAO_PAGAMENTO : distribui
+  PRECIFICACAO ||--o{ ALOCACAO_PAGAMENTO : tem_custo_liquidado
+  USUARIO ||--o{ AUDITORIA : realiza_alteracoes

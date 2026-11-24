@@ -4,7 +4,7 @@ export function Stat({ label, value, icon, note, action, onActivate }: {
   label: string;
   value: string;
   icon?: ReactNode;
-  note: string;
+  note: ReactNode;
   action?: ReactNode;
   onActivate?: () => void;
 }) {

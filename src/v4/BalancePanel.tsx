@@ -1,3 +1,4 @@
+import { useScreenPreference } from '../components/screenPreferences';
 import { sortTableRows, type ColumnSort } from '../components/tableSort';
 import { SortableTable } from '../components/SortableTable';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -48,14 +49,14 @@ export function Balance({ state, commit, navigation }: { state: State; commit: C
   }, []);
   const currentDate = today();
   const currentMonth = currentDate.slice(0, 7);
-  const [period, setPeriod] = useState<Period>(() => ({ start: monthString(monthNumber(currentMonth) - 5), end: currentMonth }));
+  const [period, setPeriod] = useScreenPreference<Period>('balanco:periodo',{ start: monthString(monthNumber(currentMonth) - 5), end: currentMonth });
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [chartView, setChartView] = useState<ChartView>('Resultado');
+  const [selectedCategories, setSelectedCategories] = useScreenPreference<string[]>('balanco:categorias',[]);
+  const [chartView, setChartView] = useScreenPreference<ChartView>('balanco:grafico','Resultado');
   const [showReversed, setShowReversed] = useState(false);
   const [chartPage, setChartPage] = useState(0);
   const [tablePage, setTablePage] = useState(0);
-  const [tableSort, setTableSort] = useState<ColumnSort | null>(null);
+  const [tableSort, setTableSort] = useScreenPreference<ColumnSort | null>('balanco:ordem',null);
   const [editor, setEditor] = useState<{ expense?: BalanceExpense } | null>(null);
   const [history, setHistory] = useState<BalanceExpense | null>(null);
 
@@ -70,6 +71,7 @@ export function Balance({ state, commit, navigation }: { state: State; commit: C
   const periodMovements = active.filter(row => inPeriod(row.date) && inCategory(row.category));
   const detailMovements = periodMovements.filter(row => inMonth(row.date));
   const totals = balanceTotals(detailMovements);
+  const billedTotal = state.invoices.reduce((sum, invoice) => sum + invoice.totalCents, 0);
   const scopeLabel = selectedMonth ? monthLabel(selectedMonth) : periodLabel(period.start, period.end);
   const periodLength = monthNumber(period.end) - monthNumber(period.start) + 1;
   const chartPages = Math.ceil(periodLength / chartPageSize);
@@ -107,7 +109,7 @@ export function Balance({ state, commit, navigation }: { state: State; commit: C
   }
 
   function toggleCategory(value: string) {
-    setSelectedCategories(previous => previous.includes(value) ? previous.filter(category => category !== value) : [...previous, value]);
+    setSelectedCategories(selectedCategories.includes(value) ? selectedCategories.filter(category => category !== value) : [...selectedCategories, value]);
     setTablePage(0);
   }
 
@@ -139,8 +141,21 @@ export function Balance({ state, commit, navigation }: { state: State; commit: C
 
   return <div className="balance">
     {navigation}
-    <section className="panel balance-filters" aria-label="Filtros do balanço">
-      <div className="balance-filter-row">
+    <section className="panel balance-filters finance-filter-header" aria-label="Filtros do balanço">
+      <h2>Balanço mensal</h2>
+      <div className="finance-filter-row balance-filter-row">
+        <label>Período<select value={period.end === currentMonth ? [1, 3, 6, 12].find(length =>
+          period.start === monthString(monthNumber(currentMonth) - length + 1)) ?? '' : ''}
+          onChange={event => {
+            const length = Number(event.target.value);
+            if (length) updatePeriod({ start: monthString(monthNumber(currentMonth) - length + 1), end: currentMonth });
+          }}>
+          <option value="" disabled>Personalizado</option>
+          <option value={1}>Mês atual</option>
+          <option value={3}>Últimos 3 meses</option>
+          <option value={6}>Últimos 6 meses</option>
+          <option value={12}>Últimos 12 meses</option>
+        </select></label>
         <label>De<input type="month" value={period.start} max={currentMonth} onChange={event => {
           const start = event.target.value;
           if (/^\d{4}-\d{2}$/.test(start) && start >= '0001-01' && start <= currentMonth) updatePeriod({ start, end: start > period.end ? start : period.end });
@@ -159,28 +174,21 @@ export function Balance({ state, commit, navigation }: { state: State; commit: C
             </div>
           </details>
         </div>
+        <button className="secondary" onClick={resetFilters}>Limpar filtros</button>
         <button className="primary" onClick={() => setEditor({})}><Plus size={16} />Lançar despesa</button>
       </div>
-      <div className="tabs balance-shortcuts" aria-label="Períodos rápidos">
-        {[['Mês atual', 1], ['Últimos 3 meses', 3], ['Últimos 6 meses', 6], ['Últimos 12 meses', 12]].map(([label, length]) => {
-          const start = monthString(monthNumber(currentMonth) - Number(length) + 1);
-          return <button key={label} className={period.start === start && period.end === currentMonth ? 'selected' : ''} onClick={() => updatePeriod({ start, end: currentMonth })}>{label}</button>;
-        })}
-      </div>
+      {selectedMonth && <div className="balance-scope" aria-live="polite">
+        <strong>{scopeLabel}</strong>
+        <button className="text-link" onClick={() => focusMonth(selectedMonth)}>Voltar ao período completo</button>
+      </div>}
     </section>
-
-    <div className="balance-scope" aria-live="polite">
-      <strong>{scopeLabel}</strong>
-      {selectedCategories.map(category => <button type="button" className="balance-filter-chip" key={category} aria-label={`Remover filtro ${category}`} onClick={() => toggleCategory(category)}>{category} ×</button>)}
-      {selectedMonth && <button className="text-link" onClick={() => focusMonth(selectedMonth)}>Voltar ao período completo</button>}
-      <button className="text-link" onClick={resetFilters}>Limpar filtros</button>
-    </div>
-    <div className="stats three balance-stats" aria-live="polite">
+    <div className="stats balance-stats" aria-live="polite">
       <Stat label="Recebido" value={money(totals.receivedCents)} note="Entradas confirmadas" />
       <Stat label="Pago" value={money(totals.paidCents)} note="Saídas confirmadas" />
       <div className={`balance-result ${totals.resultCents < 0 ? 'balance-negative' : totals.resultCents > 0 ? 'balance-positive' : ''}`}>
         <Stat label={hasCategoryFilter ? 'Fluxo selecionado' : 'Resultado de caixa'} value={money(totals.resultCents)} note={resultLabel} />
       </div>
+      <Stat label="Faturamento acumulado" value={money(billedTotal)} note={billedTotal >= 100000000 ? 'Marco de R$ 1 milhão atingido' : `${money(100000000 - billedTotal)} para o marco de R$ 1 milhão`} />
     </div>
 
     <div className="balance-panels">

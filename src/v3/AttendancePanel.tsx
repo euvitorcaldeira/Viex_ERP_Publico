@@ -1,3 +1,4 @@
+import { useScreenPreference } from '../components/screenPreferences';
 import { SortableTable } from '../components/SortableTable';
 import { useId, useRef, useState, type MouseEvent } from 'react';
 import { Ellipsis } from 'lucide-react';
@@ -37,7 +38,7 @@ function attendanceAmount(entry: Attendance | undefined, employee: Employee, sta
 
 export function AttendancePanel({ state, commit, active }: { state: State; commit: Commit; active: boolean }) {
   const [date, setDate] = useState(today);
-  const [view, setView] = useState<View>('Lista diária');
+  const [view, setView] = useScreenPreference<View>('frequencia:modo','Lista diária');
   const [selectedDay, setSelectedDay] = useState<Day | null>(null);
   const [editing, setEditing] = useState<DayEdit | null>(null);
   const [error, setError] = useFormError();

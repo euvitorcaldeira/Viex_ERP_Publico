@@ -1,0 +1,91 @@
+VIEX ERP LOCAL
+
+Para abrir em outro computador Windows
+1. Feche a janela do D’ALEX no computador de origem.
+2. Copie a pasta inteira D’ALEX ERP Local para o pendrive.
+3. No destino, copie a pasta para um local gravável no disco.
+4. Instale Python 3.11 ou mais recente. No Prompt aberto na pasta, execute:
+   python -m pip install -r requirements.txt
+5. Abra DALEX.py e entre com o mesmo usuário. Confira um romaneio, um saldo e um anexo.
+
+O que cada pasta guarda
+Dados          Banco SQLite, contas, romaneios, pagamentos e auditoria.
+Anexos         Arquivos dos romaneios. Leve junto com Dados.
+Backups        Cópias para recuperação. Guarde também uma fora do computador.
+Configuracoes  Pasta reservada a arquivos locais e incluída nos backups.
+Planilhas      Última exportação Excel. É um relatório e pode ser gerado de novo.
+backend        Servidor local do ERP.
+dist           Interface compilada. Já vem pronta, sem necessidade de Node.js no destino.
+DALEX.py       Arquivo que inicia o ERP.
+requirements.txt  Lista de dependências Python para instalação no destino.
+
+Manutenção
+Entre como Administrador e abra Configurações > Manutenção. Selecione a NF ou o
+romaneio sem NF. Confira os vínculos antes de confirmar. O ERP faz backup antes
+de excluir e conserva o registro da operação na auditoria.
+
+Uso desta versão
+- Configure o cliente padrão em Configurações > Cadastros gerais. Ele vem
+  selecionado ao criar romaneio, mas pode ser trocado no formulário.
+- Em Configurações > Nome do sistema, personalize o nome de exibição do
+  aplicativo e o nome curto da produção interna. As alterações ficam salvas
+  e aparecem na auditoria.
+- Preencha os preços unitários do cliente e da oficina durante o cadastro do
+  romaneio. Os valores podem ser revisados na etapa de produção.
+- Nas listas de romaneios e no Financeiro, o código e o item abrem os detalhes
+  do romaneio ao clicar. Os cabeçalhos foram compactados e o estado local foi
+  movido para o rodapé. No Financeiro, Contas a Receber e Impostos ficam abaixo
+  dos cartões de resumo, junto à tabela correspondente.
+- Nome e descrição da tela aparecem juntos no cabeçalho. O botão Novo romaneio
+  fica nesse cabeçalho em todos os módulos para usuários com permissão de edição.
+- Em Faturamento, veja a descrição dos itens, escolha um mês ou todas as datas,
+  e selecione ou desselecione todos os romaneios de uma vez. O resumo copiado é
+  uma linha contínua.
+- NFs importadas pelo histórico começam marcadas como isentas. A isenção é
+  apenas controle e não muda o valor da NF. Novas NFs aceitam alíquota ou
+  isenção no módulo Impostos.
+- A frequência acumula presença de segunda a sexta automaticamente desde a
+  data inicial definida no cadastro do funcionário. Registre somente exceções:
+  faltas, justificativas, horas extras e saídas antecipadas.
+- O resumo de pagamentos considera apenas funcionários ativos. Os históricos e
+  saldos individuais dos inativos continuam preservados para consulta.
+- Peças não faturadas considera o vínculo da NF no romaneio, sem revelar os
+  dados financeiros ocultos dos perfis Operação e Consulta.
+- Uma NF com imposto baixado exige desfazer essa baixa antes da remoção.
+
+Para que existem as pastas de execução
+backend     Regras e servidor local do sistema.
+dist        Interface pronta para abrir no navegador, compilada da área de
+            desenvolvimento. Os arquivos antigos não são necessários.
+Dados       Banco SQLite e registros. Não substitua ao atualizar o código.
+Anexos      Documentos associados aos romaneios.
+Backups     Cópias de segurança, inclusive a cópia criada antes de exclusões.
+Configuracoes Arquivos locais incluídos nas cópias de segurança.
+Planilhas   Planilhas exportadas; podem ser geradas novamente.
+
+Para transportar para outro computador, copie a pasta D’ALEX ERP Local inteira
+com o aplicativo fechado. Não é necessário copiar prototype-local; ela contém
+código-fonte, testes e dependências de desenvolvimento.
+
+Ajustes desta versão
+- A data de emissão da NF inicia preenchida com o dia atual.
+- Em Configurações > Nome do sistema, personalize o texto de pagamento incluído no resumo da NF (por exemplo, PIX ou transferência).
+- Financeiro permite copiar ou baixar uma lista de notas com saldo em aberto. Em notas parciais, o texto mostra o saldo restante.
+- O olho ao lado de Total a receber oculta ou mostra o valor no painel e no Financeiro.
+- Romaneios mostra primeiro Em fila, depois Em produção, Concluído e Todos; os dois primeiros exibem contadores.
+
+Balanço mensal
+Em Financeiro > Balanço mensal, selecione categorias e meses inicial/final.
+Clique em um mês ou categoria no gráfico para filtrar. Outro clique limpa a seleção.
+Recebimentos e pagamentos a funcionários, oficinas e impostos entram por data efetiva.
+Lance as demais despesas com data, categoria, descrição e valor. Há edição, estorno e desfazer estorno com histórico.
+Ao instalar esta versão, feche a janela de execução e reabra DALEX.py. Atualize o navegador com Ctrl+F5.
+A abertura aplica automaticamente a atualização da estrutura de despesas no banco. Foi criada uma cópia anterior à atualização em Backups.
+O indicador Resultado de caixa considera as entradas e saídas registradas. Ao filtrar categorias, os cartões mostram os valores dessa seleção.
+
+VIEX ERP
+Abra VIEX ERP.lnk neste computador, ou VIEX.py. Mantenha a janela do aplicativo aberta durante o uso.
+DALEX.py continua como entrada compatível para atalhos existentes.
+A pasta dist/brand contém a marca SVG, PNG e o ícone ICO.
+Ao transportar a pasta para outro computador, abra VIEX.py. O atalho .lnk contém os caminhos deste computador.
+Para atualizar a tela aberta, use Ctrl+F5 após reiniciar o aplicativo.

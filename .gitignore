@@ -17,7 +17,6 @@ scripts/test-html.cjs
 scripts/verify-public.cjs
 
 # Documentação das fases anteriores, preservada localmente como histórico
-docs/
 ARQUITETURA.md
 ARQUITETURA_V*.md
 AVALIACAO_V*.md
