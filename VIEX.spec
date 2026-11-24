@@ -1,4 +1,4 @@
-# One-folder Windows package; permanent user data is written beside DALEX.exe.
+# One-folder Windows package; permanent user data is written beside VIEX.exe.
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_all
 

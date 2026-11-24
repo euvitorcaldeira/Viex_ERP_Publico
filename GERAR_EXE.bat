@@ -23,7 +23,7 @@ if errorlevel 1 (
   exit /b 1
 )
 echo Preparando o pacote VIEX.exe em release\VIEX...
-python -m PyInstaller --clean --noconfirm --distpath release --workpath build\pyinstaller DALEX.spec
+python -m PyInstaller --clean --noconfirm --distpath release --workpath build\pyinstaller VIEX.spec
 if errorlevel 1 (
   echo A preparacao do pacote falhou. Os dados locais permanecem em Dados, Anexos e Backups.
   pause
